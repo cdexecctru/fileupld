@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dosyayı İndir | Credos Files</title>
+    <title>İndir | Credos Files</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
     <style>
         :root { --p: #a855f7; --bg: #0a0a0c; --c: #1a1a1e; --glow: 0 0 15px #a855f7; }
@@ -21,28 +21,27 @@
     <h2>CREDOS FILES</h2>
     <div class="file-info">
         <p style="margin:0; color:#aaa; font-size: 0.8rem;">Dosya Adı:</p>
-        <h3 id="fname" style="margin:5px 0; word-break: break-all;">Yükleniyor...</h3>
+        <h3 id="fname" style="margin:5px 0; word-break: break-all;">Dosya Hazırlanıyor...</h3>
     </div>
-    <p id="timer" style="margin-bottom: 20px;">Dosya hazır! Aşağıdaki butona tıkla.</p>
+    <p>Dosyanız indirilebilir! Lütfen butona basınız.</p>
     <a id="downloadLink" href="#" class="dl-btn">DOSYAYI İNDİR</a>
 </div>
 
 <script>
+    // URL'den gelen dosya bilgilerini al
     const params = new URLSearchParams(window.location.search);
     const filePath = params.get('file');
     const fileName = params.get('name');
-    
-    // BURASI ÇOK KRİTİK! 
-    const USER = "cdexecctru"; 
-    const REPO = "fileupld";
 
     if (filePath && fileName) {
         document.getElementById('fname').innerText = fileName;
-        // Linki burada senin kullanıcı adınla oluşturuyoruz
-        const rawUrl = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${filePath}`;
-        document.getElementById('downloadLink').href = rawUrl;
+        
+        // DİREKT YAZIYORUM: cdexecctru ve fileupld sabitlendi.
+        const githubLink = "https://raw.githubusercontent.com/cdexecctru/fileupld/main/" + filePath;
+        
+        document.getElementById('downloadLink').href = githubLink;
     } else {
-        document.getElementById('fname').innerText = "Hata: Link Geçersiz!";
+        document.getElementById('fname').innerText = "Hata: Dosya Bulunamadı!";
     }
 </script>
 </body>
