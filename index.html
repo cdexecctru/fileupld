@@ -11,7 +11,7 @@ async function uploadToFile() {
         const base64Content = reader.result.split(',')[1];
         
         // BURAYA YENİ YAYINLADIĞIN GOOGLE SCRIPT URL'SİNİ YAZ
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW91-kGkSye0HsQTAziK39qCyzXEzKFy0dedGnvye3we44INGLcfg6qBNYmVUBwTEUxg/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzRhkBBsaJK64iTWnAaYEEfw34npJQ-2d_XSTwki20G0XceB-qzf_PGyLwBoiNMpc1Bw/exec";
 
         try {
             const response = await fetch(SCRIPT_URL, {
@@ -37,4 +37,5 @@ async function uploadToFile() {
     };
     reader.readAsDataURL(file);
 }
+
 
