@@ -44,25 +44,23 @@ async function uploadToFile() {
     reader.onload = async function() {
         const base64Content = reader.result.split(',')[1];
         
-        // Senin Google Script URL'n
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQbh_8U6eIMzUQeufNpAK86DkZpcMQ0uNdG7khamQSNAWIYSQe_zm0KnDFaKGJJCzxDg/exec";
+        // Google Script URL'n
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyBq7N5EQt8MJGUDWxwoaUb5WwQfjMQeKGHQp5e0ZZP7guolp1ZcUG9gKR2blekVnuOQ/exec";
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     fileName: file.name,
-                    content: base64Content,
-                    user: "cdexecctru", // Bilgiler artık burada toplanıyor
-                    repo: "fileupld"
+                    content: base64Content
                 })
             });
 
             const result = await response.json();
             
             if (result.status === "success") {
-                // Linki Vercel/GitHub Pages yapısına göre temizle
-                const siteUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+                // Link yapısını senin isteğine göre doğrudan cdexecctru/fileupld şeklinde kurdum
+                const siteUrl = "https://cdexecctru.github.io/fileupld/"; 
                 const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
                 
                 status.innerHTML = `✅ Yüklendi!<br><div class="link-box"><a href="${finalLink}" target="_blank">${finalLink}</a></div>`;
@@ -70,7 +68,7 @@ async function uploadToFile() {
                 status.innerText = "❌ Hata: " + result.msg;
             }
         } catch (e) {
-            status.innerText = "⚠️ Bağlantı hatası! Google Script ayarlarını kontrol et.";
+            status.innerText = "⚠️ Bağlantı hatası!";
             console.error(e);
         }
     };
@@ -80,4 +78,3 @@ async function uploadToFile() {
 
 </body>
 </html>
-
