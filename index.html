@@ -1,7 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yükle | Credos Files</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #a855f7; --bg: #0a0a0c; --c: #1a1a1e; --glow: 0 0 15px #a855f7; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .upload-container { background: var(--c); padding: 40px; border-radius: 15px; border: 2px solid var(--p); box-shadow: var(--glow); text-align: center; width: 400px; }
+        h1 { font-family: 'Bungee', cursive; color: var(--p); margin-bottom: 20px; text-transform: uppercase; }
+        input[type="file"] { margin: 20px 0; display: block; width: 100%; border: 1px dashed var(--p); padding: 10px; border-radius: 5px; cursor: pointer; color: #fff; background: #000; }
+        .btn { background: var(--p); border: none; padding: 15px 30px; color: #fff; font-family: 'Bungee', cursive; cursor: pointer; border-radius: 8px; width: 100%; transition: 0.3s; font-size: 1rem; }
+        .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
+        #status { margin-top: 20px; word-break: break-all; font-size: 0.9rem; min-height: 20px; }
+        .link-box { background: #000; padding: 10px; border-radius: 5px; margin-top: 10px; border: 1px solid #333; }
+        a { color: var(--p); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="upload-container">
+    <h1>CREDOS FILES</h1>
+    <p>Dosyanı seç ve ömürlük linkini al.</p>
+    
+    <input type="file" id="fileInput">
+    <button class="btn" onclick="uploadToFile()">DOSYAYI YÜKLE</button>
+    
+    <div id="status"></div>
+</div>
+
+<script>
 async function uploadToFile() {
     const fileInput = document.getElementById('fileInput');
     const status = document.getElementById('status');
-    if (fileInput.files.length === 0) return alert("Dosya seçmedin!");
+    
+    if (fileInput.files.length === 0) return alert("Lütfen bir dosya seç!");
 
     const file = fileInput.files[0];
     const reader = new FileReader();
@@ -10,7 +44,7 @@ async function uploadToFile() {
     reader.onload = async function() {
         const base64Content = reader.result.split(',')[1];
         
-        // BURAYA YENİ YAYINLADIĞIN GOOGLE SCRIPT URL'SİNİ YAZ
+        // Google Script URL (Senin verdiğin URL)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzRhkBBsaJK64iTWnAaYEEfw34npJQ-2d_XSTwki20G0XceB-qzf_PGyLwBoiNMpc1Bw/exec";
 
         try {
@@ -23,19 +57,24 @@ async function uploadToFile() {
             });
 
             const result = await response.json();
+            
             if (result.status === "success") {
-                // Linkini Vercel domainine göre ayarlar
-                const siteUrl = window.location.origin + "/";
+                // Sitenin linkini oluşturur
+                const siteUrl = window.location.origin + window.location.pathname.replace('index.html', '');
                 const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
-                status.innerHTML = `✅ Yüklendi!<br><div class="link-box"><a href="${finalLink}" target="_blank" style="color:#a855f7">${finalLink}</a></div>`;
+                
+                status.innerHTML = `✅ Yüklendi!<br><div class="link-box"><a href="${finalLink}" target="_blank">${finalLink}</a></div>`;
             } else {
                 status.innerText = "❌ Hata: " + result.msg;
             }
         } catch (e) {
-            status.innerText = "⚠️ Bağlantı hatası!";
+            status.innerText = "⚠️ Bağlantı hatası! Script URL'sini ve izinleri kontrol et.";
+            console.error(e);
         }
     };
     reader.readAsDataURL(file);
 }
+</script>
 
-
+</body>
+</html>
