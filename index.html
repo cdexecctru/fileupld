@@ -14,8 +14,8 @@
         .btn { background: var(--p); border: none; padding: 15px 30px; color: #fff; font-family: 'Bungee', cursive; cursor: pointer; border-radius: 8px; width: 100%; transition: 0.3s; font-size: 1rem; }
         .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
         #status { margin-top: 20px; word-break: break-all; font-size: 0.9rem; min-height: 20px; }
-        .link-box { background: #000; padding: 10px; border-radius: 5px; margin-top: 10px; border: 1px solid #333; }
-        a { color: var(--p); text-decoration: none; font-weight: bold; }
+        .link-box { background: #000; padding: 15px; border-radius: 5px; margin-top: 15px; border: 1px solid var(--p); }
+        a { color: var(--p); text-decoration: none; font-weight: bold; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -44,22 +44,24 @@ async function uploadToFile() {
     reader.onload = async function() {
         const base64Content = reader.result.split(',')[1];
         
-        // Google Script URL (Senin verdiğin URL)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBAQsPY3PKLmn1gEwGeLicBaK72lQtLtUPv3rYW45FaktC6ITEv3pzS23phIy0Q7db/exec";
+        // Senin Google Script URL'n
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzRhkBBsaJK64iTWnAaYEEfw34npJQ-2d_XSTwki20G0XceB-qzf_PGyLwBoiNMpc1Bw/exec";
 
         try {
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     fileName: file.name,
-                    content: base64Content
+                    content: base64Content,
+                    user: "cdexecctru", // Bilgiler artık burada toplanıyor
+                    repo: "fileupld"
                 })
             });
 
             const result = await response.json();
             
             if (result.status === "success") {
-                // Sitenin linkini oluşturur
+                // Linki Vercel/GitHub Pages yapısına göre temizle
                 const siteUrl = window.location.origin + window.location.pathname.replace('index.html', '');
                 const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
                 
@@ -68,7 +70,7 @@ async function uploadToFile() {
                 status.innerText = "❌ Hata: " + result.msg;
             }
         } catch (e) {
-            status.innerText = "⚠️ Bağlantı hatası! Script URL'sini ve izinleri kontrol et.";
+            status.innerText = "⚠️ Bağlantı hatası! Google Script ayarlarını kontrol et.";
             console.error(e);
         }
     };
@@ -78,6 +80,3 @@ async function uploadToFile() {
 
 </body>
 </html>
-
-
-
