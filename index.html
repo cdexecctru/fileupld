@@ -10,10 +10,16 @@
         body { font-family: 'Roboto', sans-serif; background: var(--bg); color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .upload-container { background: var(--c); padding: 40px; border-radius: 15px; border: 2px solid var(--p); box-shadow: var(--glow); text-align: center; width: 400px; }
         h1 { font-family: 'Bungee', cursive; color: var(--p); margin-bottom: 20px; text-transform: uppercase; }
-        input[type="file"] { margin: 20px 0; display: block; width: 100%; border: 1px dashed var(--p); padding: 10px; border-radius: 5px; cursor: pointer; color: #fff; background: #000; }
+        input[type="file"] { margin: 20px 0; display: block; width: 100%; border: 1px dashed var(--p); padding: 10px; border-radius: 5px; cursor: pointer; color: #fff; background: #000; box-sizing: border-box; }
         .btn { background: var(--p); border: none; padding: 15px 30px; color: #fff; font-family: 'Bungee', cursive; cursor: pointer; border-radius: 8px; width: 100%; transition: 0.3s; font-size: 1rem; }
         .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
-        #status { margin-top: 20px; word-break: break-all; font-size: 0.9rem; min-height: 20px; }
+        .btn:disabled { background: #444; cursor: not-allowed; }
+        
+        #progressContainer { display: none; margin-top: 20px; }
+        .progress-bg { background: #000; border: 1px solid var(--p); height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; }
+        .progress-fill { background: var(--p); width: 0%; height: 100%; transition: width 0.2s ease; box-shadow: 0 0 10px var(--p); }
+        #status { word-break: break-all; font-size: 0.9rem; min-height: 20px; color: #fff; font-weight: bold; }
+        
         .link-box { background: #000; padding: 15px; border-radius: 5px; margin-top: 15px; border: 1px solid var(--p); }
         a { color: var(--p); text-decoration: none; font-weight: bold; word-break: break-all; }
     </style>
@@ -25,56 +31,85 @@
     <p>Dosyanı seç ve ömürlük linkini al.</p>
     
     <input type="file" id="fileInput">
-    <button class="btn" onclick="uploadToFile()">DOSYAYI YÜKLE</button>
+    <button class="btn" id="uploadBtn" onclick="uploadToFile()">DOSYAYI YÜKLE</button>
     
-    <div id="status"></div>
+    <div id="progressContainer">
+        <div class="progress-bg"><div class="progress-fill" id="progressBar"></div></div>
+        <div id="status">Yükleniyor... %0</div>
+    </div>
 </div>
 
 <script>
-async function uploadToFile() {
+function uploadToFile() {
     const fileInput = document.getElementById('fileInput');
     const status = document.getElementById('status');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
     
     if (fileInput.files.length === 0) return alert("Lütfen bir dosya seç!");
 
     const file = fileInput.files[0];
     const reader = new FileReader();
-    status.innerText = "Yükleniyor... ⏳";
 
-    reader.onload = async function() {
+    // Arayüzü hazırla
+    uploadBtn.disabled = true;
+    progressContainer.style.display = 'block';
+    status.innerText = "Dosya okunuyor...";
+
+    reader.onload = function() {
         const base64Content = reader.result.split(',')[1];
-        
-        // Google Script URL'n
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyBq7N5EQt8MJGUDWxwoaUb5WwQfjMQeKGHQp5e0ZZP7guolp1ZcUG9gKR2blekVnuOQ/exec";
 
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    fileName: file.name,
-                    content: base64Content
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.status === "success") {
-                // Link yapısını senin isteğine göre doğrudan cdexecctru/fileupld şeklinde kurdum
-                const siteUrl = "https://cdexecctru.github.io/fileupld/"; 
-                const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
+        const xhr = new XMLHttpRequest();
+        
+        // GERÇEK ZAMANLI YÜKLEME TAKİBİ
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = percent + "%";
+                status.innerText = `Yükleniyor... %${percent}`;
                 
-                status.innerHTML = `✅ Yüklendi!<br><div class="link-box"><a href="${finalLink}" target="_blank">${finalLink}</a></div>`;
-            } else {
-                status.innerText = "❌ Hata: " + result.msg;
+                if(percent === 100) {
+                    status.innerText = "GitHub'a işleniyor, lütfen bekleyin... 🚀";
+                }
             }
-        } catch (e) {
+        };
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const result = JSON.parse(xhr.responseText);
+                if (result.status === "success") {
+                    const siteUrl = "https://cdexecctru.github.io/fileupld/"; 
+                    const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
+                    status.innerHTML = `✅ Başarılı!<br><div class="link-box"><a href="${finalLink}" target="_blank">LİNKİ KOPYALA</a></div>`;
+                } else {
+                    status.innerText = "❌ Hata: " + result.msg;
+                    uploadBtn.disabled = false;
+                }
+            } else {
+                status.innerText = "⚠️ Sunucu hatası!";
+                uploadBtn.disabled = false;
+            }
+        };
+
+        xhr.onerror = function() {
             status.innerText = "⚠️ Bağlantı hatası!";
-            console.error(e);
-        }
+            uploadBtn.disabled = false;
+        };
+
+        xhr.open("POST", SCRIPT_URL, true);
+        // Google Script CORS gereği bazen text/plain bekleyebilir
+        xhr.send(JSON.stringify({
+            fileName: file.name,
+            content: base64Content
+        }));
     };
+
     reader.readAsDataURL(file);
 }
 </script>
 
 </body>
 </html>
+
