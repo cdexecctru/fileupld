@@ -87,7 +87,7 @@ async function uploadToFile() {
             
             if (result.status === "success") {
                 progressBar.style.width = "100%";
-                const siteUrl = "https://file.credos.qzz.io"; 
+                const siteUrl = "https://file.credos.qzz.io/"; 
                 const finalLink = `${siteUrl}download.html?file=${result.path}&name=${result.fileName}`;
                 status.innerHTML = `✅ Yüklendi!<br><div class="link-box"><a href="${finalLink}" target="_blank">LİNKİ AÇ</a></div>`;
             } else {
@@ -106,4 +106,5 @@ async function uploadToFile() {
 
 </body>
 </html>
+
 
